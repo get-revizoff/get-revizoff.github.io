@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Přehled</title>
+<style>
+:root{--blue:#2f5aa0;--accent:#ff7a00;--red:#e30613;--ink:#0b1f3a;--mute:#5b6b82;--paper:#eef1f5;--card:#fff;--line:#e1e6ee;--ok:#16a34a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif}
+.bar{background:var(--blue);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px}
+.bar b{font-size:20px;letter-spacing:.2px}.bar b i{color:var(--red);font-style:normal}
+.bar .sp{flex:1}
+button{font:inherit;border:0;border-radius:999px;padding:9px 16px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff}
+button.sec{background:#fff;color:var(--blue)} .bar button.sec{background:rgba(255,255,255,.18);color:#fff}
+button:disabled{opacity:.5;cursor:default}
+main{max-width:1000px;margin:0 auto;padding:18px}
+.login{max-width:360px;margin:12vh auto;background:var(--card);border-radius:20px;padding:26px;box-shadow:0 6px 24px rgba(11,31,58,.12)}
+.login h1{margin:0 0 4px;font-size:22px}.login p{margin:0 0 16px;color:var(--mute)}
+input{width:100%;font:inherit;padding:11px 14px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:#fff;color:var(--ink)}
+.err{color:var(--red);min-height:20px;margin:4px 0 10px;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:var(--card);border-radius:16px;padding:14px 16px;box-shadow:0 1px 4px rgba(11,31,58,.08)}
+.stat span{display:block;color:var(--mute);font-size:13px}.stat b{font-size:26px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tools input{flex:1;min-width:180px;margin:0}
+.wrap{background:var(--card);border-radius:16px;overflow:auto;box-shadow:0 1px 4px rgba(11,31,58,.08)}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{cursor:pointer;color:var(--mute);font-size:13px;user-select:none;position:sticky;top:0;background:var(--card)}
+th.on{color:var(--blue)} td.n{text-align:right} th.n{text-align:right}
+tr:last-child td{border-bottom:0}
+.empty{padding:30px;text-align:center;color:var(--mute)}
+.note{color:var(--mute);font-size:13px;margin-top:10px}
+.hide{display:none}
+@media(prefers-color-scheme:dark){:root{--ink:#eef2f8;--mute:#aebdd2;--paper:#1c2736;--card:#273548;--line:#3a4b62}
+ input{background:#1c2736}button.sec{background:#1c2736;color:#eef2f8}}
+</style>
+</head>
+<body>
+<div id="vLogin">
+ <form class="login" id="fLogin">
+  <h1>Reviz<span style="color:var(--red)">OFF</span> · přehled</h1>
+  <p>Přihlášení pro správkyni</p>
+  <input id="em" type="email" placeholder="E-mail" autocomplete="username" required>
+  <input id="pw" type="password" placeholder="Heslo" autocomplete="current-password" required>
+  <div class="err" id="eLogin"></div>
+  <button id="bLogin" style="width:100%">Přihlásit</button>
+ </form>
+</div>
+
+<div id="vApp" class="hide">
+ <div class="bar"><b>Reviz<i>OFF</i> · přehled</b><span class="sp"></span>
+  <button class="sec" id="bRef">Obnovit</button><button class="sec" id="bCsv">Export CSV</button><button class="sec" id="bOut">Odhlásit</button></div>
+ <main>
+  <div class="stats">
+   <div class="stat"><span>Registrovaní</span><b id="sReg">–</b></div>
+   <div class="stat"><span>Noví za 7 dní</span><b id="sNew">–</b></div>
+   <div class="stat"><span>Přispěli</span><b id="sPay">–</b></div>
+   <div class="stat"><span>Součet příspěvků</span><b id="sSum">–</b></div>
+  </div>
+  <div class="tools"><input id="q" type="search" placeholder="Hledat podle přezdívky…"></div>
+  <div class="wrap"><table><thead><tr id="hd"></tr></thead><tbody id="tb"></tbody></table><div class="empty hide" id="em2">Nic nenalezeno.</div></div>
+  <div class="note" id="note"></div>
+ </main>
+</div>
+
+<script>
+// Veřejné údaje (publishable klíč smí být ve stránce). Žádné tajné klíče sem nepatří.
+var SB_URL = "https://xltjnowrzyzbuohrtecl.supabase.co";
+var SB_KEY = "sb_publishable_VV2PBxifCJrFxo4pR9ovHA_ufwiam69";
+var COLS = [
+ {k:"prezdivka",t:"Přezdívka"},
+ {k:"registrace",t:"Registrace",d:1},
+ {k:"prispevku_pocet",t:"Příspěvků",n:1},
+ {k:"prispevku_soucet",t:"Součet",n:1,m:1},
+ {k:"posledni_platba",t:"Poslední platba",d:1}
+];
+var S = {tok:null,ref:null,rows:[],sort:"registrace",dir:-1,q:""};
+function $(i){return document.getElementById(i)}
+function save(){try{sessionStorage.setItem("pv",JSON.stringify({t:S.tok,r:S.ref}))}catch(e){}}
+function load(){try{var o=JSON.parse(sessionStorage.getItem("pv")||"null");if(o){S.tok=o.t;S.ref=o.r}}catch(e){}}
+function api(path,opt){opt=opt||{};var h={apikey:SB_KEY,"Content-Type":"application/json"};if(S.tok)h.Authorization="Bearer "+S.tok;
+ return fetch(SB_URL+path,{method:opt.m||"GET",headers:h,body:opt.b?JSON.stringify(opt.b):undefined})}
+function show(app){$("vLogin").classList.toggle("hide",app);$("vApp").classList.toggle("hide",!app)}
+function login(e){e.preventDefault();$("eLogin").textContent="";$("bLogin").disabled=true;
+ api("/auth/v1/token?grant_type=password",{m:"POST",b:{email:$("em").value.trim(),password:$("pw").value}}).then(function(r){return r.json().then(function(j){return[r.ok,j]})})
+ .then(function(x){$("bLogin").disabled=false;if(!x[0]||!x[1].access_token){$("eLogin").textContent="Přihlášení se nepodařilo.";return}
+  S.tok=x[1].access_token;S.ref=x[1].refresh_token;save();$("pw").value="";fetchData()})
+ .catch(function(){$("bLogin").disabled=false;$("eLogin").textContent="Nelze se spojit se serverem."})}
+function refresh(){if(!S.ref)return Promise.resolve(false);
+ return api("/auth/v1/token?grant_type=refresh_token",{m:"POST",b:{refresh_token:S.ref}}).then(function(r){return r.ok?r.json():null})
+ .then(function(j){if(j&&j.access_token){S.tok=j.access_token;S.ref=j.refresh_token;save();return true}return false}).catch(function(){return false})}
+function out(){S.tok=S.ref=null;S.rows=[];try{sessionStorage.removeItem("pv")}catch(e){}show(false)}
+function fetchData(retry){
+ return api("/rest/v1/prehled_uzivatelu?select=*&limit=10000").then(function(r){
+  if(r.status===401&&!retry)return refresh().then(function(ok){return ok?fetchData(true):out()});
+  if(!r.ok){out();$("eLogin").textContent="Přístup odepřen.";return}
+  return r.json().then(function(rows){S.rows=rows;show(true);render()})}).catch(function(){$("note").textContent="Nelze se spojit se serverem."})}
+function money(v,cur){return Number(v||0).toLocaleString("cs-CZ",{maximumFractionDigits:2})+" "+(cur||"")}
+function dt(v){if(!v)return "–";var d=new Date(v);return isNaN(d)?"–":d.toLocaleString("cs-CZ",{day:"numeric",month:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"})}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function stats(){var R=S.rows,w=Date.now()-7*864e5,sum={},p=0,n=0;
+ R.forEach(function(r){if(r.registrace&&new Date(r.registrace).getTime()>=w)n++;if(r.prispevku_pocet>0){p++;var c=r.mena||"?";sum[c]=(sum[c]||0)+Number(r.prispevku_soucet||0)}});
+ $("sReg").textContent=R.length;$("sNew").textContent=n;$("sPay").textContent=p;
+ var ks=Object.keys(sum);$("sSum").textContent=ks.length?ks.map(function(c){return money(sum[c],c)}).join(" + "):"0"}
+function view(){var q=S.q.trim().toLowerCase(),k=S.sort,d=S.dir;
+ var a=S.rows.filter(function(r){return !q||String(r.prezdivka||"").toLowerCase().indexOf(q)>=0});
+ a.sort(function(x,y){var u=x[k],v=y[k];if(u==null)return 1;if(v==null)return -1;
+  if(typeof u==="string"&&isNaN(Date.parse(u))||k==="prezdivka")return String(u).localeCompare(String(v),"cs")*d;
+  var A=isNaN(u)?Date.parse(u):Number(u),B=isNaN(v)?Date.parse(v):Number(v);return(A-B)*d});return a}
+function render(){stats();
+ $("hd").innerHTML=COLS.map(function(c){return '<th data-k="'+c.k+'" class="'+(c.n?"n ":"")+(S.sort===c.k?"on":"")+'">'+c.t+(S.sort===c.k?(S.dir>0?" ▲":" ▼"):"")+"</th>"}).join("");
+ var a=view();$("em2").classList.toggle("hide",a.length>0);
+ $("tb").innerHTML=a.map(function(r){return "<tr><td>"+esc(r.prezdivka)+"</td><td>"+dt(r.registrace)+'</td><td class="n">'+r.prispevku_pocet+'</td><td class="n">'+(r.prispevku_pocet>0?money(r.prispevku_soucet,r.mena):"–")+"</td><td>"+dt(r.posledni_platba)+"</td></tr>"}).join("");
+ $("note").textContent="Zobrazeno "+a.length+" z "+S.rows.length+". Počítají se jen ostré platby (ne Sandbox)."}
+function csv(){var a=view(),L=[COLS.map(function(c){return c.t}).join(";")];
+ a.forEach(function(r){L.push(COLS.map(function(c){var v=r[c.k];if(v==null)return"";if(c.d)v=new Date(v).toISOString();v=String(v);
+  if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'}).join(";"))});
+ var b=new Blob(["﻿"+L.join("\r\n")],{type:"text/csv;charset=utf-8"}),u=URL.createObjectURL(b),l=document.createElement("a");
+ l.href=u;l.download="uzivatele-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(u)},1000)}
+$("fLogin").addEventListener("submit",login);
+$("bRef").onclick=function(){fetchData()};$("bCsv").onclick=csv;
+$("bOut").onclick=function(){api("/auth/v1/logout",{m:"POST"}).catch(function(){});out()};
+$("q").addEventListener("input",function(){S.q=this.value;render()});
+$("hd").addEventListener("click",function(e){var k=e.target.getAttribute("data-k");if(!k)return;if(S.sort===k)S.dir*=-1;else{S.sort=k;S.dir=k==="prezdivka"?1:-1}render()});
+load();if(S.tok)fetchData();
+</script>
+</body>
+</html>
