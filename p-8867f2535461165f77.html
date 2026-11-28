@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Receppod – přehled zákazníků</title>
+<style>
+:root{--bg:#faf3e1;--card:#fff;--tx:#1a1a1a;--mu:#6e6a62;--ln:#d9cfbd;--ac:#800020;--bt:#fff;--ok:#1d7a46;--wa:#b26a00;--er:#b3261e;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#231e18;--card:#312a22;--tx:#f3ede0;--mu:#b9ae9e;--ln:#4a4034;--ac:#990029;--bt:#fff;--ok:#5ac58a;--wa:#e0a24a;--er:#ff8a80;color-scheme:dark}}
+*{box-sizing:border-box}
+html{background:var(--bg);font-size:clamp(16px,1.6vmin + 9px,24px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.45;padding:calc(8px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right)) 2rem max(16px,env(safe-area-inset-left));min-height:100vh}
+h1{font-size:1.9rem;margin:0 0 .4rem;font-weight:600}
+.wrap{max-width:68rem;margin:0 auto}
+.sub{color:var(--mu);margin:0 0 1.2rem;line-height:1.45}
+.login{font-size:16px;max-width:22em;margin:0 auto;min-height:calc(100dvh - 3rem);display:flex;flex-direction:column;justify-content:center}
+.login form{background:var(--card);border:1.5px solid color-mix(in srgb,var(--tx) 28%,var(--bg));border-radius:1.25em;padding:1.3em 1.3em 1.4em}
+.login h1{font-size:1.5em;margin:0 0 .5em;font-weight:600}
+.login label{font-size:.8em;margin:.75em 0 .25em}
+.login form input{background:var(--bg);padding:.6em .85em;font-size:1em;border-radius:.75em}
+.login form .pwr input{padding-right:2.6em}
+.login .err{margin:.4em 0 0;min-height:1.1em}
+.login .b{margin-top:.8em;padding:.65em;font-size:1em;border-radius:.8em}
+label{display:block;font-size:.85rem;font-weight:600;color:var(--mu);margin:.8rem 0 .3rem}
+input[type=email],input[type=password],input[type=text],input[type=search]{width:100%;padding:.85rem;border:1px solid var(--ln);border-radius:.8rem;background:var(--card);color:var(--tx);font:inherit;font-size:1rem}
+.pwr{position:relative;display:block}.pwr input{padding-right:2.8rem}
+.pwb{position:absolute;right:.3rem;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--mu);padding:.5rem;display:flex;cursor:pointer}
+button{font:inherit;cursor:pointer;border-radius:.8rem;border:1px solid var(--ln);background:var(--card);color:var(--tx);padding:.6rem 1rem}
+.b{width:100%;margin-top:1.2rem;padding:1rem;border:0;border-radius:.9rem;background:var(--ac);color:var(--bt);font-size:1.05rem;font-weight:600}
+.b:disabled{opacity:.5}
+.err{color:var(--er);margin:.8rem 0 0;min-height:1.4em;font-size:.95rem}
+.bar{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:.9rem}
+.bar .r{display:flex;gap:.5rem;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));gap:.6rem;margin-bottom:1rem}
+.st{background:var(--card);border:1px solid var(--ln);border-radius:1rem;padding:.7rem .9rem}
+.st b{display:block;font-size:1.5rem;font-weight:600;line-height:1.15}
+.st span{font-size:.8rem;color:var(--mu)}
+.tw{overflow-x:auto;border:1px solid var(--ln);border-radius:1rem;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:48rem}
+th,td{text-align:left;padding:.65rem .8rem;border-bottom:1px solid var(--ln);white-space:nowrap;font-size:.9rem}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;color:var(--mu);cursor:pointer;user-select:none}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:.1rem .6rem;border-radius:999px;font-size:.75rem;font-weight:600;border:1px solid currentColor}
+.p-aktivni{color:var(--ok)}.p-zkusebni{color:var(--wa)}.p-odklad{color:var(--wa)}.p-pozastaveno{color:var(--er)}.p-zruseno{color:var(--er)}.p-none{color:var(--mu)}
+.mu{color:var(--mu)}
+h2{font-size:1.1rem;margin:1.4rem 0 .4rem;font-weight:600}
+.hid{display:none}
+</style></head><body><div class="wrap">
+
+<div id="lg" class="login">
+  <form id="f" autocomplete="on">
+    <h1>Přihlásit se</h1>
+    <label for="e">E-mail</label><input id="e" type="email" autocomplete="username" required>
+    <label for="p">Heslo</label><span class="pwr"><input id="p" type="password" autocomplete="current-password" required><button type="button" class="pwb" id="eye" aria-label="Zobrazit / skrýt"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button></span>
+    <p class="err" id="le"></p>
+    <button class="b" id="lb">Přihlásit se</button>
+  </form>
+</div>
+
+<div id="ap" class="hid">
+  <div class="bar"><div><h1>Zákazníci</h1><p class="sub" id="who" style="margin:0"></p></div>
+    <div class="r"><button id="rf">Obnovit</button><button id="ex">Stáhnout tabulku (CSV)</button><button id="lo">Odhlásit</button></div></div>
+  <div class="stats" id="stats"></div>
+  <div class="bar"><input id="q" type="search" placeholder="Hledat e-mail nebo tarif…" style="max-width:360px"><span class="mu" id="cn"></span></div>
+  <div class="tw"><table><thead><tr id="th"></tr></thead><tbody id="tb"></tbody></table></div>
+  <div id="orf" class="hid"><h2>Předplatná bez přiřazeného účtu</h2>
+    <p class="sub">Nákupy, které zatím nejde spárovat s e-mailem.</p>
+    <div class="tw"><table><thead><tr><th>Tarif</th><th>Období</th><th>Lidé</th><th>Stav</th><th>Cena</th><th>Země</th><th>Prostředí</th><th>Konec</th></tr></thead><tbody id="ob"></tbody></table></div></div>
+  <p class="err" id="ae"></p>
+</div>
+
+<script>
+const SB={u:"https://ijrslhxomgpbcydsryvs.supabase.co",k:"sb_publishable_nCpmQWhySl5nrB9uLge-ag_KhUXLnVd"};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let tok=null,mail="",rows=[],sortK="registrace",sortD=-1;
+const COLS=[["email","E-mail"],["registrace","Registrace"],["tarif","Tarif"],["obdobi","Období"],["pocet_lidi","Lidé"],["stav","Stav"],["cena","Cena"],["konec_obdobi","Konec období"],["zeme","Země"],["prostredi","Prostředí"]];
+const STAV={aktivni:"Aktivní",zkusebni:"Zkušební doba",odklad:"Odklad platby",pozastaveno:"Pozastaveno",zruseno:"Zrušeno"};
+const OBD={mesicne:"měsíčně",rocne:"ročně"};
+const fd=v=>{if(!v)return"";const d=new Date(v);return isNaN(d)?"":d.toLocaleDateString("cs-CZ")};
+const fc=(c,m)=>c==null||c===""?"":new Intl.NumberFormat("cs-CZ",{style:"currency",currency:m||"CZK",minimumFractionDigits:0,maximumFractionDigits:2}).format(c);
+const pill=s=>`<span class="pill p-${s||"none"}">${esc(STAV[s]||"bez předplatného")}</span>`;
+async function api(path){
+  const r=await fetch(SB.u+path,{headers:{apikey:SB.k,Authorization:"Bearer "+tok,Accept:"application/json"}});
+  if(r.status==401||r.status==403)throw new Error("auth");
+  if(!r.ok)throw new Error("http "+r.status);
+  return r.json();
+}
+$("eye").onclick=()=>{const i=$("p");i.type=i.type=="password"?"text":"password"};
+$("f").addEventListener("submit",async ev=>{
+  ev.preventDefault();$("le").textContent="";$("lb").disabled=true;
+  try{
+    const r=await fetch(SB.u+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:SB.k,"Content-Type":"application/json"},body:JSON.stringify({email:$("e").value.trim(),password:$("p").value})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.access_token){$("le").textContent="Špatný e-mail nebo heslo.";return}
+    tok=j.access_token;mail=$("e").value.trim();$("p").value="";
+    $("lg").classList.add("hid");$("ap").classList.remove("hid");$("who").textContent="Přihlášena: "+mail;
+    await load();
+  }catch(x){$("le").textContent="Nepodařilo se připojit. Zkontrolujte internet."}
+  finally{$("lb").disabled=false}
+});
+async function load(){
+  $("ae").textContent="";
+  try{
+    rows=await api("/rest/v1/prehled_zakazniku?select=*&order=registrace.desc&limit=5000");
+    let orf=[];try{orf=await api("/rest/v1/predplatne_nepropojena?select=*&order=aktualizovano.desc&limit=500")}catch(e){}
+    render();renderOrf(orf);
+    if(!rows.length)$("ae").textContent="Zatím tu nikdo není, nebo tento účet nemá k přehledu přístup.";
+  }catch(e){
+    $("ae").textContent=e.message=="auth"?"Platnost přihlášení vypršela nebo nemáte oprávnění. Přihlaste se znovu.":"Přehled se nepodařilo načíst. Zkontrolujte, že je v Supabase spuštěný soubor 01_tabulky.sql.";
+  }
+}
+function render(){
+  const q=$("q").value.trim().toLowerCase();
+  let list=rows.filter(r=>!q||(r.email||"").toLowerCase().includes(q)||(r.tarif||"").toLowerCase().includes(q));
+  list.sort((a,b)=>{const x=a[sortK],y=b[sortK];if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;return (x>y?1:x<y?-1:0)*sortD});
+  $("th").innerHTML=COLS.map(([k,t])=>`<th data-k="${k}">${t}${sortK==k?(sortD>0?" ▲":" ▼"):""}</th>`).join("");
+  $("tb").innerHTML=list.map(r=>`<tr><td>${esc(r.email)}</td><td>${fd(r.registrace)}</td><td>${esc(r.tarif||"")}</td><td>${esc(OBD[r.obdobi]||"")}</td><td>${r.pocet_lidi!=null?esc(r.pocet_lidi):""}</td><td>${pill(r.stav)}</td><td>${fc(r.cena,r.mena)}</td><td>${fd(r.konec_obdobi)}</td><td>${esc(r.zeme||"")}</td><td class="mu">${esc(r.prostredi||"")}</td></tr>`).join("");
+  $("cn").textContent=list.length+" z "+rows.length;
+  const c=s=>rows.filter(r=>r.stav==s).length,wk=Date.now()-7*864e5;
+  $("stats").innerHTML=[["Registrovaných",rows.length],["Za 7 dní",rows.filter(r=>new Date(r.registrace)>wk).length],["Aktivních",c("aktivni")],["Zkušební doba",c("zkusebni")],["Odklad platby",c("odklad")],["Pozastaveno",c("pozastaveno")],["Zrušeno",c("zruseno")],["Bez předplatného",rows.filter(r=>!r.stav).length]].map(([t,n])=>`<div class="st"><b>${n}</b><span>${t}</span></div>`).join("");
+}
+function renderOrf(o){
+  $("orf").classList.toggle("hid",!o.length);
+  $("ob").innerHTML=o.map(r=>`<tr><td>${esc(r.tarif||"")}</td><td>${esc(OBD[r.obdobi]||"")}</td><td>${r.pocet_lidi!=null?esc(r.pocet_lidi):""}</td><td>${pill(r.stav)}</td><td>${fc(r.cena,r.mena)}</td><td>${esc(r.zeme||"")}</td><td>${esc(r.prostredi||"")}</td><td>${fd(r.konec_obdobi)}</td></tr>`).join("");
+}
+$("th").addEventListener("click",e=>{const k=e.target.dataset&&e.target.dataset.k;if(!k)return;if(sortK==k)sortD=-sortD;else{sortK=k;sortD=1}render()});
+$("q").addEventListener("input",render);
+$("rf").onclick=load;
+$("lo").onclick=()=>{tok=null;rows=[];$("ap").classList.add("hid");$("lg").classList.remove("hid");$("tb").innerHTML=""};
+$("ex").onclick=()=>{
+  const cell=v=>'"'+String(v==null?"":v).replace(/"/g,'""').replace(/^([=+\-@])/,"'$1")+'"';
+  const csv="﻿"+COLS.map(c=>cell(c[1])).join(";")+"\n"+rows.map(r=>COLS.map(([k])=>cell(k=="stav"?(STAV[r[k]]||""):k=="obdobi"?(OBD[r[k]]||""):r[k])).join(";")).join("\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="receppod-zakaznici.csv";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+};
+</script></div></body></html>
